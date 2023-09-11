@@ -22,7 +22,7 @@ const getRoomById = async (id: string): Promise<Room | null> => {
   return result;
 };
 
-export const buildingServices = {
+export const roomServices = {
   createRoom,
   getRoomById,
   getRooms,
