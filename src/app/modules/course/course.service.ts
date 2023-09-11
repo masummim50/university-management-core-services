@@ -2,7 +2,9 @@
 import { Course } from '@prisma/client';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
+import { IPaginationOptions } from '../../../interfaces/pagination';
 import prisma from '../../../shared/prisma';
+import { courseFilterType } from './course.interface';
 
 const createCourse = async (data: any): Promise<any> => {
   const newResult = await prisma.$transaction(async tx => {
@@ -28,12 +30,31 @@ const createCourse = async (data: any): Promise<any> => {
 };
 
 const getCourse = async (
-  filters: any,
-  options: any
+  filters: courseFilterType,
+  options: IPaginationOptions
 ): Promise<IGenericResponse<Course[]>> => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
+  const { searchTerm, code, credits } = filters;
+  const andConditions = [];
+  if (code) {
+    andConditions.push({
+      code,
+    });
+  }
+  if (credits) {
+    const newCredit = parseFloat(credits);
+    andConditions.push({
+      credits: newCredit,
+    });
+  }
 
   const courses = await prisma.course.findMany({
+    where: {
+      title: {
+        contains: searchTerm,
+      },
+      AND: andConditions,
+    },
     skip,
     take: limit,
   });
